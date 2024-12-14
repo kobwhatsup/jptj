@@ -5,14 +5,14 @@ from app.database import get_db
 from app.models.user import User
 from app.models.content import Policy, News
 from app.models.forum.post import ForumPost
-from app.api.auth import get_current_admin_user
+from app.api.auth import get_current_admin
 
 router = APIRouter()
 
 @router.get("/metrics")
 async def get_dashboard_metrics(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_admin_user)
+    current_user = Depends(get_current_admin)
 ):
     """Get dashboard metrics for admin panel."""
     try:
