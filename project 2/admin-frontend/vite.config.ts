@@ -11,13 +11,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]'
-      },
-      input: {
-        main: path.resolve(__dirname, 'src/main.tsx'),
-        index: path.resolve(__dirname, 'index.html')
+        manualChunks: undefined
       }
     }
   },
