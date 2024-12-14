@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -13,19 +13,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return !!localStorage.getItem('adminToken');
+    const token = localStorage.getItem('adminToken');
+    console.log('Initial auth check - token exists:', !!token);
+    return !!token;
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  // We'll use location later for redirect after login
+  // const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
+    console.log('Auth state effect - token exists:', !!token);
     setIsAuthenticated(!!token);
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
+    if (loading) {
+      console.log('Login already in progress, skipping...');
+      return;
+    }
+    console.log('Starting login process...');
     setLoading(true);
     setError(null);
     try {
@@ -35,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       formData.append('grant_type', 'password');
 
       const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/auth/login`;
-      console.log('Attempting login to:', apiUrl);
+      console.log('Sending login request to:', apiUrl);
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -47,39 +56,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         mode: 'cors',
       });
 
-      console.log('Login response status:', response.status);
-      console.log('Login response headers:', Object.fromEntries(response.headers.entries()));
+      console.log('Received response:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: '登录失败' }));
-        console.error('Login error data:', errorData);
-        throw new Error(errorData.detail || '登录失败');
+        throw new Error(data.detail || '登录失败');
       }
-
-      const data = await response.json();
-      console.log('Login response data:', data);
 
       if (!data.access_token) {
         console.error('No access token in response:', data);
-        throw new Error('登录失败：无效的响应数据');
+        throw new Error('登录失败：无效的响应格式');
       }
 
+      console.log('Login successful, storing token...');
       localStorage.setItem('adminToken', data.access_token);
-      console.log('Token stored in localStorage');
-
       setIsAuthenticated(true);
-      console.log('Authentication state updated, redirecting to dashboard');
-
-      navigate('/dashboard', { replace: true });
+      console.log('Authentication state updated, navigating...');
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError(err instanceof Error ? err.message : '登录失败，请检查用户名和密码');
       setIsAuthenticated(false);
       localStorage.removeItem('adminToken');
     } finally {
+      console.log('Login process completed');
       setLoading(false);
     }
-  }, [navigate]);
+  }, [navigate, loading]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('adminToken');

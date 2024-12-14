@@ -4,7 +4,7 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // Use absolute base path
+  base: './', // Use relative base path for production
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
