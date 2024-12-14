@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.database import get_db
 from app.models.user import User
-from app.models.content import Policy, News
+from app.models.content import Policy, IndustryNews
 from app.models.forum.post import ForumPost
 from app.api.auth import get_current_admin
 
@@ -22,7 +22,7 @@ async def get_dashboard_metrics(
 
         # Get content metrics
         total_policies = db.query(func.count(Policy.id)).scalar()
-        total_news = db.query(func.count(News.id)).scalar()
+        total_news = db.query(func.count(IndustryNews.id)).scalar()
 
         # Get forum metrics
         total_posts = db.query(func.count(ForumPost.id)).scalar()
