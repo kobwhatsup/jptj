@@ -23,7 +23,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",  # Development frontend
-        "https://run-project-app-mrfhflbq.devinapps.com"  # Production frontend
+        "https://run-project-app-mrfhflbq.devinapps.com",  # Old production frontend
+        "https://run-project-app-7kc8414b.devinapps.com"   # New production frontend
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # Specific allowed methods
