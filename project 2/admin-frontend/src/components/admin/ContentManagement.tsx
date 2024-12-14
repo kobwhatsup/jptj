@@ -73,7 +73,10 @@ const ContentManagement: React.FC = () => {
           credentials: 'include',
         }
       );
-      if (!response.ok) throw new Error(`Failed to fetch ${activeTab}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `获取${activeTab === 'policy' ? '政策' : '新闻'}列表失败`);
+      }
       const data: PolicyResponse | IndustryNewsResponse = await response.json();
       if (activeTab === 'policy') {
         setPolicies(data.items as Policy[]);
@@ -83,7 +86,8 @@ const ContentManagement: React.FC = () => {
       setTotalPages(Math.ceil(data.total / data.limit));
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : `获取${activeTab === 'policy' ? '政策' : '新闻'}列表失败`);
+      const type = activeTab === 'policy' ? '政策' : '新闻';
+      setError(err instanceof Error ? err.message : `获取${type}列表失败，请检查网络连接或重新登录`);
     } finally {
       setLoading(false);
     }
@@ -101,17 +105,25 @@ const ContentManagement: React.FC = () => {
   const confirmDelete = async () => {
     if (!selectedItem) return;
     try {
+      const token = localStorage.getItem('adminToken');
       const endpoint = activeTab === 'policy' ? 'policies' : 'news';
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/admin/${endpoint}/${selectedItem.id}`,
-        { method: 'DELETE' }
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
       );
-      if (!response.ok) throw new Error('Failed to delete item');
+      if (!response.ok) throw new Error(`删除${activeTab === 'policy' ? '政策' : '新闻'}失败`);
       await fetchContent();
       setDeleteDialogOpen(false);
       setSelectedItem(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '删除失败');
+      setError(err instanceof Error ? err.message : `删除${activeTab === 'policy' ? '政策' : '新闻'}失败`);
     }
   };
 
@@ -141,9 +153,9 @@ const ContentManagement: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">内容管理</h2>
-        <Button>
+        <Button disabled={loading}>
           <Plus className="mr-2 h-4 w-4" />
-          添加{activeTab === 'policy' ? '政策' : '新闻'}
+          {loading ? '加载中...' : `添加${activeTab === 'policy' ? '政策' : '新闻'}`}
         </Button>
       </div>
 
@@ -161,9 +173,10 @@ const ContentManagement: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
+              disabled={loading}
             />
           </div>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter} disabled={loading}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="分类筛选" />
             </SelectTrigger>
