@@ -17,6 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -45,6 +53,13 @@ interface User {
   createdAt: string;
 }
 
+interface AddUserForm {
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+}
+
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +71,15 @@ const UserManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
+
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [addUserForm, setAddUserForm] = useState<AddUserForm>({
+    username: '',
+    email: '',
+    password: '',
+    role: 'user',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -85,6 +109,42 @@ const UserManagement: React.FC = () => {
   useEffect(() => {
     fetchUsers();
   }, [page, searchTerm, roleFilter]);
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/users`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(addUserForm),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to create user');
+      }
+
+      await fetchUsers();
+      setAddUserModalOpen(false);
+      setAddUserForm({
+        username: '',
+        email: '',
+        password: '',
+        role: 'user',
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '创建用户失败');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleDeleteUser = async (user: User) => {
     setSelectedUser(user);
@@ -130,7 +190,7 @@ const UserManagement: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">用户管理</h2>
-        <Button>
+        <Button onClick={() => setAddUserModalOpen(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
           添加用户
         </Button>
@@ -266,6 +326,95 @@ const UserManagement: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={addUserModalOpen} onOpenChange={setAddUserModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>添加新用户</DialogTitle>
+            <DialogDescription>
+              请填写新用户的信息。所有字段都是必填的。
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAddUser} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="username" className="text-sm font-medium">
+                用户名
+              </label>
+              <Input
+                id="username"
+                value={addUserForm.username}
+                onChange={(e) =>
+                  setAddUserForm({ ...addUserForm, username: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                邮箱
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={addUserForm.email}
+                onChange={(e) =>
+                  setAddUserForm({ ...addUserForm, email: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium">
+                密码
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={addUserForm.password}
+                onChange={(e) =>
+                  setAddUserForm({ ...addUserForm, password: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="role" className="text-sm font-medium">
+                角色
+              </label>
+              <Select
+                value={addUserForm.role}
+                onValueChange={(value) =>
+                  setAddUserForm({ ...addUserForm, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择角色" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mediator">调解员</SelectItem>
+                  <SelectItem value="expert">专家</SelectItem>
+                  <SelectItem value="user">普通用户</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAddUserModalOpen(false)}
+              >
+                取消
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                确认添加
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
