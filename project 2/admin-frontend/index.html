@@ -4,10 +4,62 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>admin-frontend</title>
+    <title>Admin Dashboard</title>
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.__REACT_LOADED__ = false;
+      window.__REACTDOM_LOADED__ = false;
+
+      // Track script loading
+      const scriptLoadTracker = {
+        react: false,
+        reactDom: false,
+        main: false
+      };
+
+      // Global error handler
+      window.onerror = function(msg, url, line, col, error) {
+        console.error('Global error:', { msg, url, line, col, error });
+        return false;
+      };
+
+      // Track React loading
+      Object.defineProperty(window, 'React', {
+        set: function(value) {
+          this._React = value;
+          scriptLoadTracker.react = true;
+          console.log('React loaded');
+        },
+        get: function() {
+          return this._React;
+        }
+      });
+
+      // Track ReactDOM loading
+      Object.defineProperty(window, 'ReactDOM', {
+        set: function(value) {
+          this._ReactDOM = value;
+          scriptLoadTracker.reactDom = true;
+          console.log('ReactDOM loaded');
+        },
+        get: function() {
+          return this._ReactDOM;
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Fallback content in case of React initialization failure
+      setTimeout(() => {
+        const root = document.getElementById('root');
+        if (!root || !root.children.length) {
+          console.error('React failed to initialize after 5 seconds');
+          console.log('Script load status:', scriptLoadTracker);
+          root.innerHTML = '<div style="color: red; padding: 20px;">Loading failed. Please refresh the page.</div>';
+        }
+      }, 5000);
+    </script>
   </body>
 </html>

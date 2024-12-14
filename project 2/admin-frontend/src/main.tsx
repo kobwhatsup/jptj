@@ -1,21 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { HashRouter } from 'react-router-dom'
 import './index.css'
-import App from './App.tsx'
+import App from './App'
 
-// Global error handler
-window.onerror = (message, source, lineno, colno, error) => {
-  console.error('Global error:', { message, source, lineno, colno, error });
-  return false;
-};
+console.log('main.tsx is being executed');
+console.log('Environment:', import.meta.env);
 
-// Unhandled promise rejection handler
-window.onunhandledrejection = (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
-};
-
+// Track React initialization
 try {
-  console.log('Starting app initialization...', { env: import.meta.env });
+  console.log('Starting app initialization...');
   const rootElement = document.getElementById('root');
   console.log('Root element:', rootElement);
 
@@ -24,8 +18,10 @@ try {
     const root = createRoot(rootElement);
     root.render(
       <StrictMode>
-        <App />
-      </StrictMode>,
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </StrictMode>
     );
     console.log('App rendered successfully');
   } else {
