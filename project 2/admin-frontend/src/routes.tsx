@@ -13,7 +13,7 @@ export const routes = (
     <Route path="/" element={<LoginPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route
-      path="/dashboard"
+      path="/admin"
       element={
         <ProtectedRoute>
           <ErrorBoundary>
@@ -22,7 +22,7 @@ export const routes = (
         </ProtectedRoute>
       }
     >
-      <Route index element={<Dashboard />} />
+      <Route path="dashboard" element={<Dashboard />} />
       <Route path="users" element={<UserManagement />} />
       <Route path="policies" element={<ContentManagement />} />
       <Route path="news" element={<ContentManagement />} />
