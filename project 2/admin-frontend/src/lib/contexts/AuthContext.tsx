@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -15,18 +14,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const login = useCallback(async (username: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('grant_type', 'password');
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + btoa('user:b13f31fa6491e9eaeeb86384651e9457'),
         },
-        body: JSON.stringify({ username, password }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -37,19 +41,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await response.json();
       localStorage.setItem('adminToken', data.access_token);
       setIsAuthenticated(true);
-      navigate('/dashboard');
+      window.location.hash = '/dashboard';
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录失败');
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('adminToken');
     setIsAuthenticated(false);
-    navigate('/login');
-  }, [navigate]);
+    window.location.hash = '/login';
+  }, []);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout, error, loading }}>

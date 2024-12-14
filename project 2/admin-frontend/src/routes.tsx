@@ -1,10 +1,10 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createHashRouter } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
 import LoginPage from './components/auth/LoginPage';
 import UserManagement from './components/admin/UserManagement';
 import ContentManagement from './components/admin/ContentManagement';
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: '/login',
     element: <LoginPage />,
