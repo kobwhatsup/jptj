@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '../ui/button';
 import {
   Select,
   SelectContent,
@@ -34,7 +34,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, UserPlus, Edit, Trash2 } from 'lucide-react';
+import { UserPlus, Search, Edit, Trash2 } from 'lucide-react';
+import { LoadingSpinner } from '../common/loading-spinner';
+import { ApiError } from '../common/api-error';
 import {
   Pagination,
   PaginationContent,
@@ -95,7 +97,10 @@ const UserManagement: React.FC = () => {
           credentials: 'include',
         }
       );
-      if (!response.ok) throw new Error('Failed to fetch users');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || '获取用户列表失败，请检查网络连接或重新登录');
+      }
       const data = await response.json();
       setUsers(data.items);
       setTotalPages(Math.ceil(data.total / itemsPerPage));
@@ -128,7 +133,8 @@ const UserManagement: React.FC = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to create user');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || '创建用户失败，请检查输入信息是否正确');
       }
 
       await fetchUsers();
@@ -140,7 +146,7 @@ const UserManagement: React.FC = () => {
         role: 'user',
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : '创建用户失败');
+      setError(err instanceof Error ? err.message : '创建用户失败，请检查输入信息是否正确');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,23 +160,34 @@ const UserManagement: React.FC = () => {
   const confirmDelete = async () => {
     if (!selectedUser) return;
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/admin/users/${selectedUser.id}`,
-        { method: 'DELETE' }
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
       );
-      if (!response.ok) throw new Error('Failed to delete user');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || '删除用户失败，请稍后重试');
+      }
       await fetchUsers();
       setDeleteDialogOpen(false);
       setSelectedUser(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '删除用户失败');
+      setError(err instanceof Error ? err.message : '删除用户失败，请稍后重试');
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -178,10 +195,11 @@ const UserManagement: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="text-destructive space-y-2">
-          <p>{error}</p>
-          <Button onClick={fetchUsers}>重试</Button>
-        </div>
+        <ApiError
+          error={error}
+          onRetry={fetchUsers}
+          className="w-full max-w-lg"
+        />
       </div>
     );
   }
@@ -190,9 +208,9 @@ const UserManagement: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">用户管理</h2>
-        <Button onClick={() => setAddUserModalOpen(true)}>
+        <Button onClick={() => setAddUserModalOpen(true)} disabled={loading}>
           <UserPlus className="mr-2 h-4 w-4" />
-          添加用户
+          {isSubmitting ? '添加中...' : '添加用户'}
         </Button>
       </div>
 
@@ -204,9 +222,10 @@ const UserManagement: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
+            disabled={loading}
           />
         </div>
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
+        <Select value={roleFilter} onValueChange={setRoleFilter} disabled={loading}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="角色筛选" />
           </SelectTrigger>
@@ -402,12 +421,13 @@ const UserManagement: React.FC = () => {
                 type="button"
                 variant="outline"
                 onClick={() => setAddUserModalOpen(false)}
+                disabled={isSubmitting}
               >
                 取消
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingSpinner size="sm" className="mr-2" />
                 )}
                 确认添加
               </Button>
