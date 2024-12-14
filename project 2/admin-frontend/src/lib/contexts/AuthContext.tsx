@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -11,9 +12,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('adminToken');
+  });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    setIsAuthenticated(!!token);
+  }, []);
 
   const login = useCallback(async (username: string, password: string) => {
     setLoading(true);
@@ -41,19 +51,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await response.json();
       localStorage.setItem('adminToken', data.access_token);
       setIsAuthenticated(true);
-      window.location.hash = '/dashboard';
+
+      const from = (location.state as any)?.from || '/dashboard';
+      navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : '登录失败');
+      setError(err instanceof Error ? err.message : '登录失败，请检查用户名和密码');
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate, location]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('adminToken');
     setIsAuthenticated(false);
-    window.location.hash = '/login';
-  }, []);
+    navigate('/login', { replace: true });
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout, error, loading }}>
