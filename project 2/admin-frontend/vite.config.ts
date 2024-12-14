@@ -4,7 +4,7 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: './', // Use relative paths for assets
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
