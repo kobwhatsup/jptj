@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Security configuration
-SECRET_KEY = "your-secret-key-stored-in-environment"  # TODO: Move to environment variables
+SECRET_KEY = settings.SECRET_KEY  # Use settings configuration
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -24,7 +24,7 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")  # Remove /api/v1 prefix since it's added by router mount
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")  # Include full API path
 
 router = APIRouter()
 
