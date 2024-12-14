@@ -12,7 +12,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Remove React from vendor chunk since we're using CDN
+          'vendor': ['react-router-dom'],
         },
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
@@ -20,7 +21,9 @@ export default defineConfig({
       },
       input: {
         main: path.resolve(__dirname, 'index.html'),
-      }
+      },
+      // Add external dependencies for CDN
+      external: ['react', 'react-dom'],
     }
   },
   resolve: {
