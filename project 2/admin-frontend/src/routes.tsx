@@ -3,6 +3,7 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import LoginPage from './components/auth/LoginPage';
 import UserManagement from './components/admin/UserManagement';
 import ContentManagement from './components/admin/ContentManagement';
+import Dashboard from './components/admin/Dashboard';
 import { ErrorBoundary } from './components/common/error-boundary';
 import { ProtectedRoute } from './components/common/protected-route';
 import { AuthProvider } from './lib/contexts/AuthContext';
@@ -31,7 +32,7 @@ export const router = createHashRouter([
     children: [
       {
         path: '',
-        element: <Navigate to="users" replace />,
+        element: <Dashboard />,
       },
       {
         path: 'users',
