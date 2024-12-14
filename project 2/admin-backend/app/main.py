@@ -7,6 +7,7 @@ from .api.auth import router as auth_router
 from .api.users import router as users_router
 from .api.content import router as content_router
 from .api.forum.moderation import router as forum_router
+from .api.dashboard import router as dashboard_router
 from .middleware.rate_limiter import RateLimiter
 
 # Configure logging
@@ -39,6 +40,7 @@ app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(users_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(content_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(forum_router, prefix=f"{settings.API_V1_STR}/admin")
+app.include_router(dashboard_router, prefix=f"{settings.API_V1_STR}/admin/dashboard")
 
 @app.get("/healthz")
 async def healthz():
