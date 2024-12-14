@@ -53,7 +53,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       formData.append('username', username);
       formData.append('password', password);
 
-      const response = await axios.post<LoginResponse>('/api/v1/auth/login',
+      console.log('Making login request to:', '/api/v1/admin/auth/login');
+      const response = await axios.post<LoginResponse>('/api/v1/admin/auth/login',
         formData.toString(),
         {
           headers: {
@@ -62,14 +63,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       );
 
+      console.log('Login response:', response.data);
       const { access_token } = response.data;
       if (access_token) {
         localStorage.setItem('adminToken', access_token);
         console.log('Token stored in localStorage');
         setIsAuthenticated(true);
         console.log('Authentication state updated');
-        navigate('/dashboard');
-        console.log('Navigating to dashboard');
+        await new Promise(resolve => setTimeout(resolve, 500)); // Add delay before navigation
+        navigate('/admin');
+        console.log('Navigating to /admin');
       } else {
         throw new Error('未收到访问令牌');
       }
