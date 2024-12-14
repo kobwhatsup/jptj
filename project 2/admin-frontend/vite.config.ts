@@ -4,20 +4,20 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // Use relative paths for assets
+  base: '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: undefined, // Remove manual chunks configuration
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]'
       },
       input: {
-        main: path.resolve(__dirname, 'index.html'),
+        main: path.resolve(__dirname, 'src/main.tsx'),
+        index: path.resolve(__dirname, 'index.html')
       }
     }
   },
