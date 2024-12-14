@@ -26,6 +26,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",  # Development frontend
         "https://run-project-app-7kc8414b.devinapps.com",  # Current production frontend
+        "https://run-project-app-tunnel-iu4gwk03.devinapps.com",  # Development tunnel frontend
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # Specific allowed methods
