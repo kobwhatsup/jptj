@@ -1,8 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { HashRouter } from 'react-router-dom'
-import './index.css'
 import App from './App'
+import './index.css'
 
 // Add global error handler for uncaught errors
 window.addEventListener('error', (event: ErrorEvent) => {
@@ -24,8 +23,11 @@ window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => 
   });
 });
 
-console.log('Starting React initialization...');
-console.log('React version:', (React as any).version || 'unknown');
+console.log('Starting React initialization...', {
+  env: import.meta.env,
+  baseUrl: import.meta.env.BASE_URL,
+  mode: import.meta.env.MODE
+});
 
 try {
   console.log('Finding root element...');
@@ -40,12 +42,10 @@ try {
   const root = ReactDOM.createRoot(rootElement);
   console.log('React root created successfully');
 
-  console.log('Starting render...');
+  console.log('Starting render with React version:', React.version);
   root.render(
     <React.StrictMode>
-      <HashRouter>
-        <App />
-      </HashRouter>
+      <App />
     </React.StrictMode>
   );
   console.log('Render completed successfully');

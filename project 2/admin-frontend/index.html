@@ -5,11 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
     <script>
+      // Early error catching
       window.onerror = function(msg, url, line, col, error) {
         console.error('Global error:', { msg, url, line, col, error });
         return false;
@@ -20,5 +17,9 @@
         console.log('Root element:', root);
       });
     </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
