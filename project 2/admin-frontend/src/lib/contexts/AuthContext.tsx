@@ -34,33 +34,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       formData.append('password', password);
       formData.append('grant_type', 'password');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/login`, {
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/auth/login`;
+      console.log('Attempting login to:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Basic ' + btoa('user:b13f31fa6491e9eaeeb86384651e9457'),
         },
         body: formData,
+        credentials: 'include',
+        mode: 'cors',
       });
 
+      console.log('Login response status:', response.status);
+      console.log('Login response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ detail: '登录失败' }));
+        console.error('Login error data:', errorData);
         throw new Error(errorData.detail || '登录失败');
       }
 
       const data = await response.json();
-      localStorage.setItem('adminToken', data.access_token);
-      setIsAuthenticated(true);
+      console.log('Login response data:', data);
 
-      const from = (location.state as any)?.from || '/dashboard';
-      navigate(from, { replace: true });
+      if (!data.access_token) {
+        console.error('No access token in response:', data);
+        throw new Error('登录失败：无效的响应数据');
+      }
+
+      localStorage.setItem('adminToken', data.access_token);
+      console.log('Token stored in localStorage');
+
+      setIsAuthenticated(true);
+      console.log('Authentication state updated, redirecting to dashboard');
+
+      navigate('/dashboard', { replace: true });
     } catch (err) {
+      console.error('Login error:', err);
       setError(err instanceof Error ? err.message : '登录失败，请检查用户名和密码');
       setIsAuthenticated(false);
+      localStorage.removeItem('adminToken');
     } finally {
       setLoading(false);
     }
-  }, [navigate, location]);
+  }, [navigate]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('adminToken');

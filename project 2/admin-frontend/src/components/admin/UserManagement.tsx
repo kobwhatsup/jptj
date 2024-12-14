@@ -60,12 +60,20 @@ const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users?page=${page}&limit=${itemsPerPage}&search=${searchTerm}&role=${roleFilter}`
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/users?page=${page}&limit=${itemsPerPage}&search=${searchTerm}&role=${roleFilter}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
       );
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
-      setUsers(data.users);
+      setUsers(data.items);
       setTotalPages(Math.ceil(data.total / itemsPerPage));
     } catch (err) {
       setError(err instanceof Error ? err.message : '获取用户列表失败');
@@ -87,7 +95,7 @@ const UserManagement: React.FC = () => {
     if (!selectedUser) return;
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users/${selectedUser.id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/users/${selectedUser.id}`,
         { method: 'DELETE' }
       );
       if (!response.ok) throw new Error('Failed to delete user');

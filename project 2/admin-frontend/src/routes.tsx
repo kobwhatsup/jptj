@@ -5,6 +5,7 @@ import UserManagement from './components/admin/UserManagement';
 import ContentManagement from './components/admin/ContentManagement';
 import { ErrorBoundary } from './components/common/error-boundary';
 import { ProtectedRoute } from './components/common/protected-route';
+import { AuthProvider } from './lib/contexts/AuthContext';
 
 export const router = createHashRouter([
   {
@@ -14,12 +15,18 @@ export const router = createHashRouter([
   },
   {
     path: '/login',
-    element: <LoginPage />,
+    element: <AuthProvider><LoginPage /></AuthProvider>,
     errorElement: <ErrorBoundary><Outlet /></ErrorBoundary>,
   },
   {
     path: '/dashboard',
-    element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
+    element: (
+      <AuthProvider>
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      </AuthProvider>
+    ),
     errorElement: <ErrorBoundary><Outlet /></ErrorBoundary>,
     children: [
       {

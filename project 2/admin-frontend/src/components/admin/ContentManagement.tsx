@@ -61,9 +61,17 @@ const ContentManagement: React.FC = () => {
   const fetchContent = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('adminToken');
       const endpoint = activeTab === 'policy' ? 'policies' : 'news';
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/${endpoint}?page=${page}&limit=${itemsPerPage}&search=${searchTerm}&category=${categoryFilter}`
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/${endpoint}?page=${page}&limit=${itemsPerPage}&search=${searchTerm}&category=${categoryFilter}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
       );
       if (!response.ok) throw new Error(`Failed to fetch ${activeTab}`);
       const data: PolicyResponse | IndustryNewsResponse = await response.json();
@@ -95,7 +103,7 @@ const ContentManagement: React.FC = () => {
     try {
       const endpoint = activeTab === 'policy' ? 'policies' : 'news';
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/${endpoint}/${selectedItem.id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/${endpoint}/${selectedItem.id}`,
         { method: 'DELETE' }
       );
       if (!response.ok) throw new Error('Failed to delete item');

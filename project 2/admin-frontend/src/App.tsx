@@ -1,12 +1,12 @@
 import { RouterProvider } from 'react-router-dom';
-import { AuthProvider } from './lib/contexts/AuthContext';
+import { ThemeProvider } from 'next-themes';
 import { router } from './routes';
 
 function App() {
   return (
-    <AuthProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <RouterProvider router={router} />
-    </AuthProvider>
+    </ThemeProvider>
   );
 }
 
