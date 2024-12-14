@@ -1,39 +1,50 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
+
+interface ErrorResponse {
+  detail: string;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
-  error: string | null;
-  loading: boolean;
+}
+
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+// Configure axios defaults
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('adminToken');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const token = localStorage.getItem('adminToken');
-    console.log('Initial auth check - token exists:', !!token);
     return !!token;
   });
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  // We'll use location later for redirect after login
-  // const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    console.log('Auth state effect - token exists:', !!token);
-    setIsAuthenticated(!!token);
-  }, []);
-
-  const login = useCallback(async (username: string, password: string) => {
-    if (loading) {
-      console.log('Login already in progress, skipping...');
-      return;
-    }
+  const login = async (username: string, password: string) => {
     console.log('Starting login process...');
     setLoading(true);
     setError(null);
@@ -41,58 +52,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
-      formData.append('grant_type', 'password');
 
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/v1/auth/login`;
-      console.log('Sending login request to:', apiUrl);
+      const response = await axios.post<LoginResponse>('/api/v1/auth/login',
+        formData.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData,
-        credentials: 'include',
-        mode: 'cors',
-      });
-
-      console.log('Received response:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
-
-      if (!response.ok) {
-        throw new Error(data.detail || '登录失败');
+      const { access_token } = response.data;
+      if (access_token) {
+        localStorage.setItem('adminToken', access_token);
+        console.log('Token stored in localStorage');
+        setIsAuthenticated(true);
+        console.log('Authentication state updated');
+        navigate('/dashboard');
+        console.log('Navigating to dashboard');
+      } else {
+        throw new Error('未收到访问令牌');
       }
-
-      if (!data.access_token) {
-        console.error('No access token in response:', data);
-        throw new Error('登录失败：无效的响应格式');
-      }
-
-      console.log('Login successful, storing token...');
-      localStorage.setItem('adminToken', data.access_token);
-      setIsAuthenticated(true);
-      console.log('Authentication state updated, navigating...');
-      navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err instanceof Error ? err.message : '登录失败，请检查用户名和密码');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const errorData = (err.response as any).data as ErrorResponse;
+        setError(errorData.detail || '登录失败');
+      } else if (err instanceof Error) {
+        setError(err.message || '登录失败');
+      } else {
+        setError('登录失败');
+      }
       setIsAuthenticated(false);
       localStorage.removeItem('adminToken');
     } finally {
-      console.log('Login process completed');
       setLoading(false);
     }
-  }, [navigate, loading]);
+  };
 
-  const logout = useCallback(() => {
+  const logout = () => {
     localStorage.removeItem('adminToken');
     setIsAuthenticated(false);
-    navigate('/login', { replace: true });
-  }, [navigate]);
+    navigate('/login');
+  };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, error, loading }}>
+    <AuthContext.Provider value={{ isAuthenticated, loading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -105,3 +110,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default AuthContext;

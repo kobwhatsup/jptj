@@ -7,8 +7,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '../common/loading-spinner';
 
 const LoginPage: React.FC = () => {
-  console.log('LoginPage component rendering...');
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, error, loading, isAuthenticated } = useAuth();
@@ -26,12 +24,6 @@ const LoginPage: React.FC = () => {
     console.log('Login form submitted:', { username });
     await login(username, password);
   };
-
-  console.log('LoginPage rendering with state:', {
-    isAuthenticated,
-    error,
-    loading
-  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -58,6 +50,7 @@ const LoginPage: React.FC = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={loading}
                   required
+                  data-devinid="username"
                 />
               </div>
               <div className="space-y-2">
@@ -68,12 +61,14 @@ const LoginPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                   required
+                  data-devinid="password"
                 />
               </div>
               <Button
                 type="submit"
                 className="w-full"
                 disabled={loading}
+                data-devinid="login-button"
               >
                 {loading ? (
                   <>

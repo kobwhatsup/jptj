@@ -6,6 +6,7 @@ import ContentManagement from './components/admin/ContentManagement';
 import Dashboard from './components/admin/Dashboard';
 import ForumManagement from './components/admin/ForumManagement';
 import { ErrorBoundary } from './components/common/error-boundary';
+import { ProtectedRoute } from './components/common/protected-route';
 
 export const routes = (
   <Routes>
@@ -14,9 +15,11 @@ export const routes = (
     <Route
       path="/dashboard"
       element={
-        <ErrorBoundary>
-          <DashboardLayout />
-        </ErrorBoundary>
+        <ProtectedRoute>
+          <ErrorBoundary>
+            <DashboardLayout />
+          </ErrorBoundary>
+        </ProtectedRoute>
       }
     >
       <Route index element={<Dashboard />} />
