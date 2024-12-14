@@ -9,7 +9,7 @@ from app.api.auth import get_current_admin
 
 router = APIRouter()
 
-@router.get("/dashboard/metrics")
+@router.get("/metrics")  # Changed from "/dashboard/metrics" since prefix already includes /admin
 async def get_dashboard_metrics(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_admin)
