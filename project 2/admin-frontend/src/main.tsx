@@ -4,6 +4,15 @@ import { HashRouter } from 'react-router-dom'
 import './index.css'
 import App from './App'
 
+// Enable more detailed error reporting
+window.addEventListener('error', (event) => {
+  console.error('Script error:', event);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+});
+
 console.log('main.tsx is being executed');
 console.log('Environment:', import.meta.env);
 
