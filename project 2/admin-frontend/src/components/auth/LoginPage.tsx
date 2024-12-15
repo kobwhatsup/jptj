@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '../common/loading-spinner';
+import { Navigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -28,7 +29,7 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       {isAuthenticated ? (
-        <div>Redirecting to dashboard...</div>
+        <Navigate to="/admin/dashboard" replace />
       ) : (
         <Card className="w-[400px]">
           <CardHeader className="space-y-1">

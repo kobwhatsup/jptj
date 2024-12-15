@@ -88,7 +88,7 @@ const UserManagement: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users?page=${page}&limit=${itemsPerPage}&search=${searchTerm}&role=${roleFilter}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/users?page=${page}&limit=${itemsPerPage}&search=${searchTerm}&role=${roleFilter}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

@@ -73,7 +73,7 @@ const ForumManagement: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/forum/posts?page=${page}&size=${itemsPerPage}${
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/forum/posts?page=${page}&size=${itemsPerPage}${
           postStatusFilter !== 'all' ? `&status=${postStatusFilter}` : ''
         }${categoryFilter !== 'all' ? `&category=${categoryFilter}` : ''}`,
         {
@@ -98,7 +98,7 @@ const ForumManagement: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/forum/comments?page=${page}&size=${itemsPerPage}${
+        `${import.meta.env.VITE_API_URL}/api/v1/admin/forum/comments?page=${page}&size=${itemsPerPage}${
           commentStatusFilter !== 'all' ? `&status=${commentStatusFilter}` : ''
         }`,
         {

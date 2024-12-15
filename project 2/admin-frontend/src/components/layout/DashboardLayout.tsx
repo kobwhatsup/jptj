@@ -19,11 +19,11 @@ const DashboardLayout: React.FC = () => {
   const { logout } = useAuth();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: '仪表盘', path: '/dashboard' },
-    { icon: Users, label: '用户管理', path: '/dashboard/users' },
-    { icon: FileText, label: '政策管理', path: '/dashboard/policies' },
-    { icon: Newspaper, label: '新闻管理', path: '/dashboard/news' },
-    { icon: MessageSquare, label: '论坛管理', path: '/dashboard/forum' },
+    { icon: LayoutDashboard, label: '仪表盘', path: '/admin/dashboard' },
+    { icon: Users, label: '用户管理', path: '/admin/users' },
+    { icon: FileText, label: '政策管理', path: '/admin/policies' },
+    { icon: Newspaper, label: '新闻管理', path: '/admin/news' },
+    { icon: MessageSquare, label: '论坛管理', path: '/admin/forum' },
   ];
 
   return (

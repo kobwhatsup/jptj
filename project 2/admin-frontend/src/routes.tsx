@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
 import LoginPage from './components/auth/LoginPage';
 import UserManagement from './components/admin/UserManagement';
@@ -10,10 +10,10 @@ import { ProtectedRoute } from './components/common/protected-route';
 
 export const routes = (
   <Routes>
-    <Route path="/" element={<LoginPage />} />
+    <Route path="/" element={<Navigate to="/login" replace />} />
     <Route path="/login" element={<LoginPage />} />
     <Route
-      path="/admin"
+      path="/admin/*"
       element={
         <ProtectedRoute>
           <ErrorBoundary>
@@ -22,6 +22,7 @@ export const routes = (
         </ProtectedRoute>
       }
     >
+      <Route index element={<Navigate to="dashboard" replace />} />
       <Route path="dashboard" element={<Dashboard />} />
       <Route path="users" element={<UserManagement />} />
       <Route path="policies" element={<ContentManagement />} />

@@ -24,9 +24,9 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")  # Include full API path
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")  # Full path that clients will use
 
-router = APIRouter()
+router = APIRouter(prefix="/auth")  # Added prefix to match main.py configuration
 
 class Token(BaseModel):
     access_token: str
@@ -90,7 +90,7 @@ async def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = D
         logger.error(f"JWT Error: {str(e)}")
         raise credentials_exception
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token)  # Now becomes /api/v1/auth/login when combined with prefixes
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     try:
         logger.debug(f"Login attempt for username: {form_data.username}")

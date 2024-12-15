@@ -26,12 +26,22 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Configure axios defaults
+const apiUrl = import.meta.env.VITE_API_URL;
+console.log('API URL from env:', apiUrl); // Debug log
+
+if (!apiUrl) {
+  console.error('API URL not found in environment variables');
+  throw new Error('API URL not configured. Please check environment variables.');
+}
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: apiUrl,
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded',
   },
 });
+
+console.log('Axios client configured with baseURL:', apiClient.defaults.baseURL);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -69,10 +79,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       formData.append('username', username);
       formData.append('password', password);
 
-      console.log('Making login request to:', `${import.meta.env.VITE_API_URL}/api/v1/auth/login`);
+      console.log('Making login request to:', `${apiClient.defaults.baseURL}/api/v1/auth/login`);
       const response = await apiClient.post<LoginResponse>(
         '/api/v1/auth/login',
-        formData.toString()
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
       );
 
       console.log('Login response:', response);

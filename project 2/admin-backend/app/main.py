@@ -29,15 +29,15 @@ app.add_middleware(
         "https://run-project-app-tunnel-iu4gwk03.devinapps.com",  # Development tunnel frontend
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # Specific allowed methods
-    allow_headers=["Authorization", "Content-Type"],  # Specific allowed headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],  # Added OPTIONS for preflight
+    allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],  # Added common headers
 )
 
 # Add rate limiting middleware
 app.middleware("http")(RateLimiter())
 
-# Include routers
-app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth")
+# Include routers with correct API prefix
+app.include_router(auth_router, prefix=settings.API_V1_STR)  # Changed to remove duplicate /api/v1
 app.include_router(users_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(content_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(forum_router, prefix=f"{settings.API_V1_STR}/admin")
