@@ -10,7 +10,7 @@ import { Navigate } from 'react-router-dom';
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login, error, loading, isAuthenticated } = useAuth();
+  const { login, error, loading, isAuthenticated, setError, setLoading } = useAuth();
 
   useEffect(() => {
     console.log('LoginPage mounted, auth state:', {
@@ -18,7 +18,12 @@ const LoginPage: React.FC = () => {
       error,
       loading
     });
-  }, [isAuthenticated, error, loading]);
+    return () => {
+      // Cleanup loading and error states when component unmounts
+      setLoading(false);
+      setError(null);
+    };
+  }, [isAuthenticated, error, loading, setError, setLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

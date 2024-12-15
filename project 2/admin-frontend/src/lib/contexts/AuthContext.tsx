@@ -17,6 +17,8 @@ interface AuthContextType {
   error: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  setError: (error: string | null) => void;
+  setLoading: (loading: boolean) => void;
 }
 
 interface AuthProviderProps {
@@ -27,7 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Configure axios defaults
 const apiUrl = import.meta.env.VITE_API_URL;
-console.log('API URL from env:', apiUrl); // Debug log
+console.log('API URL from env:', apiUrl);
 
 if (!apiUrl) {
   console.error('API URL not found in environment variables');
@@ -39,6 +41,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 console.log('Axios client configured with baseURL:', apiClient.defaults.baseURL);
@@ -54,7 +57,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const token = localStorage.getItem('adminToken');
     if (token) {
       setIsAuthenticated(true);
-      // Configure axios interceptor with stored token
       apiClient.interceptors.request.use((config) => {
         const newConfig = { ...config };
         if (!newConfig.headers) {
@@ -96,7 +98,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('adminToken', access_token);
         console.log('Token stored in localStorage');
 
-        // Configure axios interceptor with new token
         apiClient.interceptors.request.use((config) => {
           const newConfig = { ...config };
           if (!newConfig.headers) {
@@ -113,21 +114,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         throw new Error('未收到访问令牌');
       }
-    } catch (err) {
-      const error = err as Error | { response?: { data?: ErrorResponse } };
-      console.error('Login error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        response: 'response' in error ? error.response?.data : null,
-      });
+    } catch (error: unknown) {
+      console.error('Login error details:', error);
 
-      if ('response' in error && error.response?.data) {
-        const errorData = error.response.data as ErrorResponse;
+      // Type guard for axios error response
+      type AxiosErrorResponse = {
+        response?: {
+          status?: number;
+          data?: ErrorResponse;
+        };
+        code?: string;
+        message?: string;
+      };
+
+      const axiosError = error as AxiosErrorResponse;
+
+      if (axiosError.code === 'ECONNABORTED') {
+        setError('登录超时，请重试');
+      } else if (axiosError.response?.status === 401) {
+        setError('用户名或密码错误');
+      } else if (axiosError.response?.data) {
+        const errorData = axiosError.response.data;
         setError(errorData.detail || '登录失败');
       } else if (error instanceof Error) {
-        setError(error.message || '登录失败');
+        setError(error.message);
       } else {
-        setError('登录失败');
+        setError('登录失败，请重试');
       }
+
       setIsAuthenticated(false);
       localStorage.removeItem('adminToken');
     } finally {
@@ -143,7 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, error, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, loading, error, login, logout, setError, setLoading }}>
       {children}
     </AuthContext.Provider>
   );
