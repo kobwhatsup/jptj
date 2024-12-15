@@ -37,7 +37,7 @@ app.add_middleware(
 app.middleware("http")(RateLimiter())
 
 # Include routers
-app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth")
 app.include_router(users_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(content_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(forum_router, prefix=f"{settings.API_V1_STR}/admin")
