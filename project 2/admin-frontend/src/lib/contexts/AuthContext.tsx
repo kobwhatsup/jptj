@@ -26,23 +26,35 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Configure axios defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  },
 });
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const token = localStorage.getItem('adminToken');
-    return !!token;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Initialize authentication state
+  React.useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      setIsAuthenticated(true);
+      // Configure axios interceptor with stored token
+      apiClient.interceptors.request.use((config) => {
+        const newConfig = { ...config };
+        if (!newConfig.headers) {
+          newConfig.headers = {};
+        }
+        newConfig.headers.Authorization = `Bearer ${token}`;
+        return newConfig;
+      });
+    }
+  }, []);
 
   const login = async (username: string, password: string) => {
     console.log('Starting login process...');
@@ -53,36 +65,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       formData.append('username', username);
       formData.append('password', password);
 
-      console.log('Making login request to:', '/api/v1/admin/auth/login');
-      const response = await axios.post<LoginResponse>('/api/v1/admin/auth/login',
-        formData.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
+      console.log('Making login request to:', `${import.meta.env.VITE_API_URL}/api/v1/auth/login`);
+      const response = await apiClient.post<LoginResponse>(
+        '/api/v1/auth/login',
+        formData.toString()
       );
 
-      console.log('Login response:', response.data);
+      console.log('Login response:', response);
       const { access_token } = response.data;
       if (access_token) {
         localStorage.setItem('adminToken', access_token);
         console.log('Token stored in localStorage');
+
+        // Configure axios interceptor with new token
+        apiClient.interceptors.request.use((config) => {
+          const newConfig = { ...config };
+          if (!newConfig.headers) {
+            newConfig.headers = {};
+          }
+          newConfig.headers.Authorization = `Bearer ${access_token}`;
+          return newConfig;
+        });
+
         setIsAuthenticated(true);
         console.log('Authentication state updated');
-        await new Promise(resolve => setTimeout(resolve, 500)); // Add delay before navigation
-        navigate('/admin');
-        console.log('Navigating to /admin');
+        navigate('/admin/dashboard');
+        console.log('Navigation triggered');
       } else {
         throw new Error('未收到访问令牌');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      if (err && typeof err === 'object' && 'response' in err) {
-        const errorData = (err.response as any).data as ErrorResponse;
+      const error = err as Error | { response?: { data?: ErrorResponse } };
+      console.error('Login error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        response: 'response' in error ? error.response?.data : null,
+      });
+
+      if ('response' in error && error.response?.data) {
+        const errorData = error.response.data as ErrorResponse;
         setError(errorData.detail || '登录失败');
-      } else if (err instanceof Error) {
-        setError(err.message || '登录失败');
+      } else if (error instanceof Error) {
+        setError(error.message || '登录失败');
       } else {
         setError('登录失败');
       }
