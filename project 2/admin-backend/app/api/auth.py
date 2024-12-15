@@ -90,7 +90,7 @@ async def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = D
         logger.error(f"JWT Error: {str(e)}")
         raise credentials_exception
 
-@router.post("/auth/login", response_model=Token)
+@router.post("/api/v1/auth/login", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     try:
         logger.debug(f"Login attempt for username: {form_data.username}")
