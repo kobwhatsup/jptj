@@ -58,6 +58,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string) => {
     console.log('Starting login process...');
+    if (loading) {
+      console.log('Login already in progress, returning...');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -112,6 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsAuthenticated(false);
       localStorage.removeItem('adminToken');
     } finally {
+      console.log('Login process completed, resetting loading state');
       setLoading(false);
     }
   };
