@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 import logging
 from .config import settings
-from .api.auth import router as auth_router
+from .api.auth import router as auth_router, pwd_context
 from .api.users import router as users_router
 from .api.content import router as content_router
 from .api.forum.moderation import router as forum_router
 from .api.dashboard import router as dashboard_router
 from .middleware.rate_limiter import RateLimiter
+from .middleware.performance import PerformanceMiddleware
+from .database import database
 import uvicorn
 
 # Configure logging
@@ -33,7 +35,8 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],  # Added common headers
 )
 
-# Add rate limiting middleware
+# Add middleware
+app.add_middleware(PerformanceMiddleware)
 app.middleware("http")(RateLimiter())
 
 # Include routers with correct API prefix
@@ -42,6 +45,20 @@ app.include_router(users_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(content_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(forum_router, prefix=f"{settings.API_V1_STR}/admin")
 app.include_router(dashboard_router, prefix=f"{settings.API_V1_STR}/admin/dashboard")
+
+@app.on_event("startup")
+async def startup_event():
+    # Pre-initialize database connection pool
+    await database.connect()
+    # Warm up authentication system
+    pwd_context.hash("warmup")
+    logger.info("Application startup complete: database connected and auth system warmed up")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    # Clean up database connections
+    await database.disconnect()
+    logger.info("Application shutdown: database connections closed")
 
 @app.get("/healthz")
 async def healthz():

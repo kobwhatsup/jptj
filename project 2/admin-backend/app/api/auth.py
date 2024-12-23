@@ -110,11 +110,16 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
         logger.debug("Successfully generated access token")
         return {"access_token": access_token, "token_type": "bearer"}
+    except HTTPException as he:
+        # Re-raise HTTP exceptions (like 401) without wrapping them
+        logger.error(f"HTTP Exception in login_for_access_token: {str(he)}")
+        raise
     except Exception as e:
-        logger.error(f"Error in login_for_access_token: {str(e)}")
+        # Handle unexpected errors with 500
+        logger.error(f"Unexpected error in login_for_access_token: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail="An unexpected error occurred"
         )
 
 @router.post("/admin/logout")
