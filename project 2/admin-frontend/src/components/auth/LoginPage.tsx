@@ -12,22 +12,48 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const { login, error, loading, isAuthenticated, setError, setLoading } = useAuth();
 
+  // Add loading state timeout
   useEffect(() => {
-    console.log('LoginPage mounted, auth state:', {
+    let timeoutId: NodeJS.Timeout;
+    if (loading) {
+      timeoutId = setTimeout(() => {
+        setError('登录请求超时，请刷新页面重试');
+        setLoading(false);
+      }, 15000);  // 15 second timeout
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [loading, setError, setLoading]);
+
+  // Debug logging effect
+  useEffect(() => {
+    console.log('LoginPage state:', {
       isAuthenticated,
       error,
-      loading
+      loading,
+      hasUsername: Boolean(username),
+      hasPassword: Boolean(password),
+      timestamp: new Date().toISOString()
     });
+
     return () => {
-      // Cleanup loading and error states when component unmounts
-      setLoading(false);
-      setError(null);
+      if (loading || error) {
+        console.log('LoginPage unmounting - cleaning up states');
+        setLoading(false);
+        setError(null);
+      }
     };
-  }, [isAuthenticated, error, loading, setError, setLoading]);
+  }, [isAuthenticated, error, loading, setError, setLoading, username, password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login form submitted:', { username });
+    console.log('Login attempt:', {
+      username,
+      timestamp: new Date().toISOString(),
+      hasError: Boolean(error),
+      isLoading: loading
+    });
     await login(username, password);
   };
 
