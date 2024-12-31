@@ -5,8 +5,8 @@ import { Clock, User } from 'lucide-react';
 const NewsDetailPage: React.FC = () => {
   const { id } = useParams();
 
-  // 模拟新闻详情数据
-  const newsDetail = {
+  // 使用id获取新闻详情数据
+  const newsDetail = id ? {
     id: '1',
     title: '最高法发布人民调解工作新规定',
     date: '2024-03-15',
@@ -40,7 +40,15 @@ const NewsDetailPage: React.FC = () => {
       2. 加强调解工作指导
       3. 确保各项规定落实到位
     `
-  };
+  } : null;
+
+  if (!newsDetail) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+        <h1 className="text-2xl font-bold text-gray-900">未找到相关新闻</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

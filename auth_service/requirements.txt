@@ -1,0 +1,16 @@
+bcrypt==4.2.1
+cffi==1.17.1
+cryptography==44.0.0
+ecdsa==0.19.0
+greenlet==3.0.3
+passlib==1.7.4
+playwright==1.41.1
+psutil==6.1.1
+pyasn1==0.6.1
+pycparser==2.22
+pyee==11.0.1
+python-jose==3.3.0
+python-multipart==0.0.20
+rsa==4.9
+six==1.17.0
+typing_extensions==4.12.2

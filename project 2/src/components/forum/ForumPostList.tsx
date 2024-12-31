@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, User, Eye, ThumbsUp, MessageSquare, Tag } from 'lucide-react';
+import { Calendar, Eye, ThumbsUp, MessageSquare, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ForumPost } from '../../lib/types/forum';
 
