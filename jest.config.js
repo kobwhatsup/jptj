@@ -24,7 +24,10 @@ module.exports = {
       env: {
         VITE_VOLCANO_APP_ID: '8048191148',
         VITE_VOLCANO_ACCESS_TOKEN: '7abXElU-PpLM0_SV-DLBzGcMgkMFSMtR',
-        VITE_VOLCANO_SECRET_KEY: 'kWOiFVBJ_cK5c-7mqu_g6JLhMQD2xnbr'
+        VITE_VOLCANO_SECRET_KEY: 'kWOiFVBJ_cK5c-7mqu_g6JLhMQD2xnbr',
+        VITE_VOLCANO_TTS_APP_ID: '8048191148',
+        VITE_VOLCANO_TTS_ACCESS_TOKEN: '7abXElU-PpLM0_SV-DLBzGcMgkMFSMtR',
+        VITE_VOLCANO_TTS_SECRET_KEY: 'kWOiFVBJ_cK5c-7mqu_g6JLhMQD2xnbr'
       }
     }
   }
