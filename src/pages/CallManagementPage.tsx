@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Scene, Task, Batch, CallLine, SceneMonitor,
-  SceneRule, TaskTarget, Permission, Role, User
+  SceneRule, Role, User
 } from '../lib/types/callManagement';
 import {
   sceneManagement,
-  taskManagement,
   sceneMonitor,
-  callLineManagement,
-  permissionManagement
+  callLineManagement
 } from '../lib/services/callManagement';
 
 /**
