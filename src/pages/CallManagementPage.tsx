@@ -8,6 +8,7 @@ import {
   sceneMonitor,
   callLineManagement
 } from '../lib/services/callManagement';
+import { ASRMonitor } from '../components/asr/ASRMonitor';
 
 /**
  * 场景管理组件
@@ -74,9 +75,9 @@ const SceneManagement: React.FC = () => {
  * 任务管理组件
  */
 const TaskManagement: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [batches, setBatches] = useState<Batch[]>([]);
+  const [batches] = useState<Batch[]>([]);
 
   // 任务状态标签样式映射
   const statusStyles: Record<Task['status'], string> = {
@@ -188,6 +189,8 @@ const SceneMonitoring: React.FC = () => {
  */
 const CallLineManagement: React.FC = () => {
   const [lines, setLines] = useState<CallLine[]>([]);
+  const [selectedLine, setSelectedLine] = useState<CallLine | null>(null);
+  const [recognizedText, setRecognizedText] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const loadLines = async () => {
@@ -235,6 +238,34 @@ const CallLineManagement: React.FC = () => {
               <div>失败率: {Math.round(line.metrics.failureRate)}%</div>
               <div>平均延迟: {line.metrics.averageLatency}ms</div>
               <div>每分钟成本: ¥{line.metrics.costPerMinute.toFixed(2)}</div>
+              <button
+                className="mt-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedLine(selectedLine?.id === line.id ? null : line);
+                }}
+              >
+                {selectedLine?.id === line.id ? '关闭监控' : '开启监控'}
+              </button>
+              {selectedLine?.id === line.id && (
+                <div className="mt-4">
+                  <ASRMonitor
+                    callId={line.id}
+                    onRecognitionResult={(text) => {
+                      setRecognizedText(prev => ({
+                        ...prev,
+                        [line.id]: text
+                      }));
+                    }}
+                  />
+                  {recognizedText[line.id] && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded">
+                      <div className="font-medium">最新识别结果:</div>
+                      <div className="text-sm">{recognizedText[line.id]}</div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -247,8 +278,8 @@ const CallLineManagement: React.FC = () => {
  * 权限管理组件
  */
 const PermissionManagement: React.FC = () => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [roles] = useState<Role[]>([]);
+  const [users] = useState<User[]>([]);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   return (
