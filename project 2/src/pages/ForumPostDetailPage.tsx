@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Calendar, User, Eye, ThumbsUp, MessageSquare, Tag } from 'lucide-react';
+import { Calendar, Eye, ThumbsUp, MessageSquare, Tag } from 'lucide-react';
 import { forumPosts } from '../lib/constants/forumData';
 
 const ForumPostDetailPage: React.FC = () => {
