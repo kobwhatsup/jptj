@@ -12,7 +12,17 @@ class KnowledgeAPI {
       },
       body: JSON.stringify(input),
     });
-    return response.json();
+    const source = await response.json();
+    
+    // 处理知识
+    const { knowledgeProcessor } = await import('../services/knowledgeProcessor');
+    const result = await knowledgeProcessor.processKnowledge(source);
+    
+    if (result.status === 'failure') {
+      throw new Error(result.error);
+    }
+    
+    return source;
   }
 
   // 添加文档知识
