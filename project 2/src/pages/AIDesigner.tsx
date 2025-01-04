@@ -7,9 +7,11 @@ import { Loader2 } from 'lucide-react';
 
 export default function AIDesigner() {
   const [prompt, setPrompt] = useState('');
+  const [iterationPrompt, setIterationPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState('');
   const [error, setError] = useState('');
+  const [previousPrompts, setPreviousPrompts] = useState<string[]>([]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -24,6 +26,34 @@ export default function AIDesigner() {
       const imageUrl = await generateDesign(prompt);
       if (imageUrl) {
         setGeneratedImage(imageUrl);
+        setPreviousPrompts([...previousPrompts, prompt]);
+      } else {
+        setError('生成设计失败，请重试');
+      }
+    } catch (err) {
+      setError('生成设计时发生错误，请重试');
+      console.error('设计生成错误:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleIterate = async () => {
+    if (!iterationPrompt.trim()) {
+      setError('请输入迭代描述');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const combinedPrompt = [...previousPrompts, iterationPrompt].join(' 并且 ');
+      const imageUrl = await generateDesign(combinedPrompt);
+      if (imageUrl) {
+        setGeneratedImage(imageUrl);
+        setPreviousPrompts([...previousPrompts, iterationPrompt]);
+        setIterationPrompt('');
       } else {
         setError('生成设计失败，请重试');
       }
@@ -81,8 +111,40 @@ export default function AIDesigner() {
           <img
             src={generatedImage}
             alt="AI生成的T恤设计"
-            className="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
+            className="w-full max-w-2xl mx-auto rounded-lg shadow-lg mb-6"
           />
+          
+          <div className="mt-8 space-y-4">
+            <h3 className="text-lg font-semibold">优化设计</h3>
+            {previousPrompts.length > 0 && (
+              <div className="text-sm text-gray-600 mb-2">
+                已使用的描述：{previousPrompts.join(' → ')}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                value={iterationPrompt}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIterationPrompt(e.target.value)}
+                placeholder="添加更多细节来优化设计..."
+                className="flex-1"
+                disabled={loading}
+              />
+              <Button
+                onClick={handleIterate}
+                disabled={loading || !iterationPrompt.trim()}
+                className="whitespace-nowrap"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    优化中...
+                  </>
+                ) : (
+                  '优化设计'
+                )}
+              </Button>
+            </div>
+          </div>
         </Card>
       )}
     </div>
