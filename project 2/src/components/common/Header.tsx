@@ -34,17 +34,17 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-indigo-600">金牌调解员</h1>
+              <h1 className="text-2xl font-bold text-indigo-600">T恤商城</h1>
             </Link>
-            <nav className="hidden md:ml-8 md:flex space-x-1">
+            <nav className="hidden md:ml-8 md:flex space-x-4">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`text-sm font-medium ${
                     isActive(item.href)
-                      ? 'text-white bg-indigo-600'
-                      : 'text-gray-700 hover:bg-indigo-50 hover:text-indigo-600'
+                      ? 'text-indigo-600'
+                      : 'text-gray-600 hover:text-indigo-600'
                   }`}
                 >
                   {item.name}
@@ -54,11 +54,11 @@ const Header: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            <div className="relative hidden md:block">
               <input
                 type="text"
                 placeholder="搜索..."
-                className="w-32 px-3 py-1.5 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-32 px-3 py-1.5 text-sm border-gray-300 focus:ring-indigo-500"
               />
               <Search className="absolute right-2 top-1.5 h-4 w-4 text-gray-400" />
             </div>
@@ -67,24 +67,24 @@ const Header: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100"
+                  className="flex items-center space-x-2 p-1.5 hover:text-indigo-600"
                 >
-                  <User className="h-5 w-5 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">{user?.profile?.name || user?.username}</span>
+                  <User className="h-5 w-5" />
+                  <span className="text-sm font-medium hidden md:inline">{user?.profile?.name || user?.username}</span>
                 </button>
                 
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div className="absolute right-0 mt-2 w-48 bg-white shadow-md">
                     <div className="py-1">
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-gray-600 hover:text-indigo-600"
                       >
                         个人资料
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:text-indigo-600"
                       >
                         <div className="flex items-center">
                           <LogOut className="h-4 w-4 mr-2" />
@@ -99,13 +99,13 @@ const Header: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
-                  className="text-sm font-medium text-gray-700 hover:text-indigo-600 px-3 py-1.5"
+                  className="text-sm font-medium text-gray-600 hover:text-indigo-600"
                 >
                   登录
                 </Link>
                 <Link
                   to="/register"
-                  className="text-sm font-medium text-white bg-indigo-600 px-3 py-1.5 rounded-md hover:bg-indigo-700"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
                 >
                   注册
                 </Link>
@@ -114,7 +114,7 @@ const Header: React.FC = () => {
             
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-100"
+              className="md:hidden p-2 text-gray-600 hover:text-indigo-600"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -123,22 +123,29 @@ const Header: React.FC = () => {
         
         {/* 移动端菜单 */}
         {isMenuOpen && (
-          <div className="md:hidden py-2">
+          <div className="md:hidden py-2 border-t border-gray-100">
             <div className="space-y-1">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  className={`block px-3 py-2 text-sm font-medium ${
                     isActive(item.href)
-                      ? 'text-white bg-indigo-600'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
+                      ? 'text-indigo-600'
+                      : 'text-gray-600 hover:text-indigo-600'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
+              <div className="px-3 py-2">
+                <input
+                  type="text"
+                  placeholder="搜索..."
+                  className="w-full px-3 py-1.5 text-sm border-gray-300 focus:ring-indigo-500"
+                />
+              </div>
             </div>
           </div>
         )}
