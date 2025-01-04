@@ -16,7 +16,8 @@ const LoginPage: React.FC = () => {
     try {
       await login(formData);
       navigate('/');
-    } catch (err) {
+    } catch (error) {
+      console.error('登录失败:', error);
       // 错误已在 useAuth 中处理
     }
   };

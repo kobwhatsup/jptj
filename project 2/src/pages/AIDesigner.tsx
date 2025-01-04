@@ -5,7 +5,13 @@ import { Card } from '../components/ui/card';
 import { generateDesign } from '../lib/api/ai';
 import { Loader2 } from 'lucide-react';
 
-export default function AIDesigner() {
+import { Product } from '../lib/types';
+
+interface AIDesignerProps {
+  addToCart: (product: Product) => void;
+}
+
+export default function AIDesigner({ addToCart }: AIDesignerProps) {
   const [prompt, setPrompt] = useState('');
   const [iterationPrompt, setIterationPrompt] = useState('');
   const [loading, setLoading] = useState(false);
@@ -121,27 +127,46 @@ export default function AIDesigner() {
                 已使用的描述：{previousPrompts.join(' → ')}
               </div>
             )}
-            <div className="flex gap-2">
-              <Input
-                value={iterationPrompt}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIterationPrompt(e.target.value)}
-                placeholder="添加更多细节来优化设计..."
-                className="flex-1"
-                disabled={loading}
-              />
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={iterationPrompt}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIterationPrompt(e.target.value)}
+                  placeholder="添加更多细节来优化设计..."
+                  className="flex-1"
+                  disabled={loading}
+                />
+                <Button
+                  onClick={handleIterate}
+                  disabled={loading || !iterationPrompt.trim()}
+                  className="whitespace-nowrap"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      优化中...
+                    </>
+                  ) : (
+                    '优化设计'
+                  )}
+                </Button>
+              </div>
               <Button
-                onClick={handleIterate}
-                disabled={loading || !iterationPrompt.trim()}
-                className="whitespace-nowrap"
+                onClick={() => addToCart({
+                  id: Date.now(),
+                  name: 'AI 定制T恤',
+                  price: 99.99,
+                  image: generatedImage,
+                  description: 'AI 生成的独家设计',
+                  category: 'AI定制',
+                  reviews: [],
+                  tags: ['AI', '定制']
+                })}
+                disabled={!generatedImage}
+                className="w-full"
+                variant="secondary"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    优化中...
-                  </>
-                ) : (
-                  '优化设计'
-                )}
+                添加到购物车
               </Button>
             </div>
           </div>

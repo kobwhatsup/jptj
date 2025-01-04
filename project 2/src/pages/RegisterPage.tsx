@@ -23,7 +23,8 @@ const RegisterPage: React.FC = () => {
     try {
       await register(formData);
       navigate('/');
-    } catch (err) {
+    } catch (error) {
+      console.error('注册失败:', error);
       // 错误已在 useAuth 中处理
     }
   };

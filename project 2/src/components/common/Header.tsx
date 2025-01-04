@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Search, User, LogOut } from 'lucide-react';
+import { Menu, Search, User, LogOut, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../../lib/hooks/useAuth';
 
-const Header: React.FC = () => {
+import { CartItem } from '../../lib/types';
+
+interface HeaderProps {
+  cartItems: CartItem[];
+}
+
+const Header: React.FC<HeaderProps> = ({ cartItems }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const location = useLocation();
@@ -11,12 +17,10 @@ const Header: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
 
   const navigation = [
-    { name: '网站介绍', href: '/about' },
-    { name: '法律法规', href: '/laws' },
-    { name: '政策解读', href: '/policies' },
-    { name: '行业动态', href: '/industry' },
-    { name: '培训课程', href: '/courses' },
-    { name: '知识论坛', href: '/forum' }
+    { name: '首页', href: '/' },
+    { name: '商品列表', href: '/products' },
+    { name: 'AI设计师', href: '/designer' },
+    { name: '购物车', href: '/cart' }
   ];
 
   const isActive = (path: string) => {
@@ -34,7 +38,7 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-indigo-600">金牌调解员</h1>
+              <h1 className="text-2xl font-bold text-indigo-600">AI Design Tee</h1>
             </Link>
             <nav className="hidden md:ml-8 md:flex space-x-1">
               {navigation.map((item) => (
@@ -62,6 +66,15 @@ const Header: React.FC = () => {
               />
               <Search className="absolute right-2 top-1.5 h-4 w-4 text-gray-400" />
             </div>
+            
+            <Link to="/cart" className="relative">
+              <ShoppingCart className="h-5 w-5 text-gray-600" />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartItems.reduce((total, item) => total + item.quantity, 0)}
+                </span>
+              )}
+            </Link>
             
             {isAuthenticated ? (
               <div className="relative">

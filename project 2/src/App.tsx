@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
@@ -17,12 +17,31 @@ import ForumPostDetailPage from './pages/ForumPostDetailPage';
 import NewsDetailPage from './pages/NewsDetailPage';
 import CoursesPage from './pages/CoursesPage';
 import CourseDetailPage from './pages/CourseDetailPage';
+import AIDesigner from './pages/AIDesigner';
+
+import { Product, CartItem } from './lib/types';
 
 const App: React.FC = () => {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const addToCart = (product: Product) => {
+    setCartItems(currentItems => {
+      const existingItem = currentItems.find(item => item.id === product.id);
+      if (existingItem) {
+        return currentItems.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...currentItems, { ...product, quantity: 1 }];
+    });
+  };
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Header />
+        <Header cartItems={cartItems} />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -40,6 +59,7 @@ const App: React.FC = () => {
             <Route path="/courses/:id" element={<CourseDetailPage />} />
             <Route path="/forum" element={<ForumPage />} />
             <Route path="/forum/:id" element={<ForumPostDetailPage />} />
+            <Route path="/designer" element={<AIDesigner addToCart={addToCart} />} />
           </Routes>
         </main>
         <Footer />

@@ -4,6 +4,7 @@ import { Clock, User } from 'lucide-react';
 
 const NewsDetailPage: React.FC = () => {
   const { id } = useParams();
+  console.log('当前新闻ID:', id);
 
   // 模拟新闻详情数据
   const newsDetail = {

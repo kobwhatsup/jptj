@@ -31,3 +31,29 @@ export interface ForumPost {
   likes: number;
   views: number;
 }
+
+// 商品评论类型定义
+export interface Review {
+  id: number;
+  rating: number;
+  comment: string;
+  userId: number;
+  date: string;
+}
+
+// 商品类型定义
+export interface Product {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  category: string;
+  reviews: Review[];
+  tags: string[];
+}
+
+// 购物车商品类型定义
+export interface CartItem extends Product {
+  quantity: number;
+}
