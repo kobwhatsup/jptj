@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { generateDesign } from '@/lib/api/ai';
+import { useState } from 'react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Card } from '../components/ui/card';
+import { generateDesign } from '../lib/api/ai';
 import { Loader2 } from 'lucide-react';
 
 export default function AIDesigner() {
